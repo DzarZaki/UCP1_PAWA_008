@@ -1,0 +1,17 @@
+<div class="container mt-5">
+    <h1>Swimming Pools</h1>
+    <a href="/pools/new" class="btn btn-primary">Add New Pool</a>
+    <ul class="list-group mt-3">
+        <% pools.forEach(pool => { %>
+            <li class="list-group-item">
+                <h5><%= pool.name %></h5>
+                <p><%= pool.location %></p>
+                <p><%= pool.description %></p>
+                <a href="/pools/edit/<%= pool.id %>" class="btn btn-warning">Edit</a>
+                <form action="/pools/delete/<%= pool.id %>" method="POST" style="display:inline;">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </li>
+        <% }); %>
+    </ul>
+</div>

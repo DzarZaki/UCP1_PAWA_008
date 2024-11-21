@@ -1,0 +1,112 @@
+<div class="container mt-5">
+    <h1 class="text-center">Daftar Kolam Renang</h1>
+
+    <!-- Form to Add New Pool -->
+    <form id="addPoolForm" class="my-4">
+        <div class="input-group">
+            <input type="text" id="newPoolName" class="form-control" placeholder="Nama kolam renang..." required>
+            <div class="input-group-append">
+                <button type="submit" class="btn btn-primary">Tambah Kolam Renang</button>
+            </div>
+        </div>
+    </form>
+
+    <!-- List of Pools -->
+    <ul id="poolList" class="list-group">
+        <% pools.forEach(pool => { %>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span>
+                    <%= pool.name %> - <%= pool.status %>
+                </span>
+                <div>
+                    <button class="btn btn-sm btn-success mr-2 editBtn" data-id="<%= pool.id %>">Edit</button>
+                    <button class="btn btn-sm btn-danger deleteBtn" data-id="<%= pool.id %>">Delete</button>
+                </div>
+            </li>
+        <% }); %>
+    </ul>
+
+    <!-- Edit Pool Modal -->
+    <div id="editModal" class="modal fade" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalLabel">Edit Kolam Renang</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editPoolForm">
+                        <div class="form-group">
+                            <label for="editPoolName">Nama Kolam Renang</label>
+                            <input type="text" id="editPoolName" class="form-control" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary mt-3">Simpan Perubahan</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        // Add new pool
+        $('#addPoolForm').on('submit', function (e) {
+            e.preventDefault();
+            const poolName = $('#newPoolName').val().trim();
+            if (poolName) {
+                $.ajax({
+                    url: '/pools',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ name: poolName }),
+                    success: function (newPool) {
+                        location.reload(); // Reload to show the new pool
+                    },
+                    error: function (error) {
+                        console.error("Error adding pool:", error.responseText);
+                    }
+                });
+            }
+        });
+
+        // Delete a pool
+        $('.deleteBtn').on('click', function () {
+            const id = $(this).data('id');
+            $.ajax({
+                url: '/pools/' + id,
+                type: 'DELETE',
+                success: function () {
+                    location.reload(); // Reload to show updated list
+                }
+            });
+        });
+
+        // Show edit modal with the current pool name
+        let editId;
+        $('.editBtn').on('click', function () {
+            editId = $(this).data('id');
+            const currentPoolName = $(this).closest('li').find('span').text();
+            $('#editPoolName').val(currentPoolName.split(' - ')[0]);
+            $('#editModal').modal('show');
+        });
+
+        // Update pool on form submission
+        $('#editPoolForm').on('submit', function (e) {
+            e.preventDefault();
+            const poolName = $('#editPoolName').val().trim();
+            if (poolName) {
+                $.ajax({
+                    url: '/pools/' + editId,
+                    type: 'PUT',
+                    data: JSON.stringify({ name: poolName, status: 'Active' }),
+                    contentType: 'application/json',
+                    success: function () {
+                        location.reload(); // Reload to show the updated pool
+                    }
+                });
+            }
+        });
+    });
+</script>
